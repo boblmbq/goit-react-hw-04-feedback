@@ -15,8 +15,7 @@ const Statistics = props => {
       })}
       <li>Total: {totalFeadback}</li>
       <li>
-        Positeve feedback:
-        {positivePercentage}
+        Positeve feedback: {positivePercentage}%
       </li>
     </ul>
   );
