@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 import FeadbackOptions from './FeadbackOptions';
 import Section from './Section';
 import Statistics from './Statistics';
@@ -16,33 +16,31 @@ const theme = {
   },
 };
 
+function reducer(prevValue, action) {
+  let arrType;
+  if (action.type === 'good') {
+    arrType = { good: prevValue.good + action.payload };
+  } else if (action.type === 'bad') {
+    arrType = { bad: prevValue.bad + action.payload };
+  } else {
+    arrType = { neutral: prevValue.neutral + action.payload };
+  }
+  return { ...prevValue, ...arrType };
+}
+
 export function App() {
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
-
-  const state = { good, bad, neutral };
-
-  const onLeaveFeedback = type => {
-    console.log(type);
-    switch (type) {
-      case 'good':
-        setGood(good + 1);
-        break;
-      case 'bad':
-        setBad(bad + 1);
-        break;
-      case 'neutral':
-        setNeutral(neutral + 1);
-        break;
-      default:
-        return;
-    }
-  };
+  const [statistic, dispatch] = useReducer(reducer, {
+    good: 0,
+    bad: 0,
+    neutral: 0,
+  });
+  const { good, bad, neutral } = statistic;
 
   const countTotalFeedback = () => {
     return good + bad + neutral;
   };
+
+  // я зробив це спочатку через useState але потім переписав на useReduce, попрошу вас більше про нього розповісти на уроці
 
   const countPositiveFeedbackPercentage = () => {
     return ((good / countTotalFeedback()) * 100).toFixed(2);
@@ -52,8 +50,8 @@ export function App() {
     <ThemeProvider theme={theme}>
       <Section titleText="Please leave feedback" title="h1">
         <FeadbackOptions
-          onLeaveFeedback={onLeaveFeedback}
-          options={Object.keys(state)}
+          onLeaveFeedback={el => dispatch({ type: el, payload: 1 })}
+          options={Object.keys(statistic)}
         />
       </Section>
 
@@ -62,7 +60,7 @@ export function App() {
           <Statistics
             totalFeadback={countTotalFeedback()}
             positivePercentage={countPositiveFeedbackPercentage()}
-            data={state}
+            data={statistic}
           />
         ) : (
           <Notification message={'There is no statistics yet'} />
